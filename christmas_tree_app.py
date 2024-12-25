@@ -1,115 +1,72 @@
-import turtle
+import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
 import random
 
-# 初始化屏幕
-screen = turtle.Screen()
-screen.title("圣诞树生成器 - 小王圣诞快乐")
-screen.bgcolor("black")
-screen.setup(width=800, height=600)
+# Function to draw a beautifully decorated Christmas tree
+def draw_beautiful_christmas_tree():
+    # Create a figure
+    fig, ax = plt.subplots(figsize=(6, 8), facecolor="black")
 
-# 创建画笔
-pen = turtle.Turtle()
-pen.speed(0)
-pen.hideturtle()
+    # Parameters for the tree
+    layers = 6  # Number of layers
+    layer_height = 1.5  # Height of each layer
 
-# 动态绘制 "小王圣诞快乐" 的文字
-def draw_text():
-    pen.penup()
-    pen.goto(0, -250)
-    pen.color("red")
-    pen.write("小王圣诞快乐", align="center", font=("Arial", 30, "bold"))
+    # Draw the layers of the tree
+    for i in range(layers):
+        x = [-i - 1, 0, i + 1]  # Triangle vertices for the x-axis
+        y = [-(i * layer_height), layer_height - (i * layer_height), -(i * layer_height)]  # Triangle vertices for the y-axis
+        ax.fill(x, y, color="#228B22")  # Use a darker green for the tree
 
-# 绘制圣诞树的主体部分
-def draw_tree():
-    tree = turtle.Turtle()
-    tree.speed(3)
-    tree.hideturtle()
-    tree.color("green")
+    # Draw the star at the top
+    star_x = np.array([0, 0.1, 0.5, 0.2, 0.3, 0, -0.3, -0.2, -0.5, -0.1]) * 1.5
+    star_y = np.array([1, 0.4, 0.3, 0, -0.5, -0.2, -0.5, 0, 0.3, 0.4]) + (layers * layer_height)
+    ax.fill(star_x, star_y, color="gold")  # Golden star
 
-    # 绘制树的主体（多层三角形）
-    levels = 5  # 树的层数
-    base_width = 240
-    for i in range(levels):
-        width = base_width - (i * 40)
-        height = 50
-        tree.penup()
-        tree.goto(-width / 2, -50 - (i * height))
-        tree.pendown()
-        tree.begin_fill()
-        for _ in range(3):  # 绘制三角形
-            tree.forward(width)
-            tree.left(120)
-        tree.end_fill()
+    # Draw the trunk
+    ax.fill([-0.5, -0.5, 0.5, 0.5], [-layers * layer_height - 0.5, -layers * layer_height - 2, -layers * layer_height - 2, -layers * layer_height - 0.5], color="#8B4513")
 
-# 绘制圣诞树顶部的星星
-def draw_star():
-    star = turtle.Turtle()
-    star.speed(2)
-    star.hideturtle()
-    star.penup()
-    star.goto(0, 120)
-    star.color("yellow")
-    star.begin_fill()
-    for _ in range(5):
-        star.forward(40)
-        star.right(144)
-    star.end_fill()
+    # Add decorations (balls and garlands)
+    for _ in range(80):
+        x = random.uniform(-layers, layers)  # Random x position
+        y = random.uniform(-(layers * layer_height), layers * layer_height)  # Random y position
+        if y < layer_height * layers and abs(x) < (layers - abs(y) / layer_height):  # Ensure decorations are within the tree
+            ax.scatter(x, y, color=random.choice(["red", "gold", "blue", "silver", "white"]), s=50, alpha=0.8)
 
-# 添加彩色装饰物（动态效果）
-def add_decorations():
-    decorations = turtle.Turtle()
-    decorations.speed(0)
-    decorations.hideturtle()
-    colors = ["red", "gold", "blue", "orange", "white"]
-    for _ in range(40):
-        x = random.randint(-100, 100)
-        y = random.randint(-180, 100)
-        decorations.penup()
-        decorations.goto(x, y)
-        decorations.pendown()
-        decorations.dot(10, random.choice(colors))
+    # Add garlands (horizontal curved lines)
+    for i in range(1, layers):
+        y = -(i * layer_height) + layer_height / 2
+        x = np.linspace(-i, i, 100)
+        ax.plot(x, y - 0.1 * np.sin(5 * np.pi * x / i), color="yellow", lw=2, alpha=0.6)
 
-# 添加动态雪花
-def draw_snowflakes():
-    snow = turtle.Turtle()
-    snow.speed(0)
-    snow.hideturtle()
-    snow.color("white")
-    for _ in range(50):
-        x = random.randint(-300, 300)
-        y = random.randint(-300, 300)
-        snow.penup()
-        snow.goto(x, y)
-        snow.pendown()
-        snow.dot(5)
+    # Add snowflakes in the background
+    for _ in range(150):
+        x = random.uniform(-layers - 2, layers + 2)
+        y = random.uniform(-layers * layer_height - 2, layers * layer_height + 2)
+        ax.scatter(x, y, color="white", s=random.randint(10, 30), alpha=0.5)
 
-# 绘制圣诞树的树干
-def draw_trunk():
-    trunk = turtle.Turtle()
-    trunk.speed(2)
-    trunk.hideturtle()
-    trunk.color("brown")
-    trunk.penup()
-    trunk.goto(-15, -250)
-    trunk.pendown()
-    trunk.begin_fill()
-    for _ in range(2):  # 绘制矩形
-        trunk.forward(30)
-        trunk.left(90)
-        trunk.forward(50)
-        trunk.left(90)
-    trunk.end_fill()
+    # Add text for a holiday greeting
+    ax.text(0, -layers * layer_height - 3, "🎄 小王圣诞快乐！ 🎅", fontsize=20, color="red", ha="center", va="center")
 
-# 绘制完整的圣诞树
-def main():
-    draw_text()  # 绘制祝福文字
-    draw_star()  # 绘制顶部星星
-    draw_tree()  # 绘制圣诞树主体
-    draw_trunk()  # 绘制树干
-    add_decorations()  # 添加装饰
-    draw_snowflakes()  # 添加雪花
-    screen.mainloop()
+    # Configure the plot
+    ax.axis("off")  # Hide axes
+    ax.set_xlim(-layers - 1, layers + 1)
+    ax.set_ylim(-layers * layer_height - 4, layers * layer_height + 3)
 
-# 启动程序
-main()
+    return fig
 
+# Streamlit page configuration
+st.set_page_config(page_title="美化圣诞树生成器", page_icon="🎄", layout="centered")
+
+# Page title
+st.title("🎄 美化圣诞树生成器 🎄")
+
+# Holiday greeting
+st.markdown("<h2 style='text-align: center; color: red;'>小倩圣诞快乐！🎅🤶</h2>", unsafe_allow_html=True)
+
+# Button to generate the Christmas tree
+if st.button("生成圣诞树"):
+    st.pyplot(draw_beautiful_christmas_tree())
+
+# Footer
+st.write("✨ **Merry Christmas and Happy New Year!** ✨")
